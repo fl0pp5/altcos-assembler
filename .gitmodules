@@ -1,0 +1,4 @@
+[submodule "scripts/specs/startup-installer-altcos"]
+	path = scripts/specs/startup-installer-altcos
+	url = http://git.altlinux.org/people/fl0pp5/packages/startup-installer-altcos.git
+

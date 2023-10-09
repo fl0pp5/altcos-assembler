@@ -1,0 +1,76 @@
+variables:
+- name: stream
+  value: altcos/x86_64/sisyphus/base
+- name: repo_root
+  value: "echo -n `pwd`/ALTCOS/repo"
+  command: true
+- name: mode
+  value: "bare"
+- name: storage
+  value: "echo -n `pwd`/ALTCOS/storage"
+  command: true
+
+services:
+- name: checkout.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    dest_stream: $stream
+  as_root: true
+
+- name: apt.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    action: update
+    pkgs: ""
+  as_root: true
+
+- name: apt.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    action: install
+    pkgs: "htop"
+  as_root: true
+
+- name: make-commit.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    commit: latest
+    next: minor
+    message: "feat: add the htop package"
+  as_root: true
+
+- name: build-qcow2.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    storage: $storage
+    commit: latest
+  as_root: true
+
+- name: pkgdiff.py
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    commit: latest
+  as_root: true
+
+- name: buildsum.py
+  args:
+    branch: sisyphus
+    storage: $storage
+  as_root: true
+
+- name: pull-local.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    commit: latest
+  as_root: true

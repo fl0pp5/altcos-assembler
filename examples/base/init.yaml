@@ -1,0 +1,65 @@
+variables:
+- name: stream
+  value: altcos/x86_64/sisyphus/base
+- name: repo_root
+  value: "echo -n `pwd`/ALTCOS/repo"
+  command: true
+- name: storage
+  value: "echo -n `pwd`/ALTCOS/storage"
+  command: true
+- name: mkimage
+  value: "echo -n `pwd`/ALTCOS/mkimage-profiles"
+  command: true
+- name: mode
+  value: "bare"
+
+services:
+- name: init-base.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+
+- name: get-rootfs.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mkimage_root: $mkimage
+
+- name: convert-rootfs.sh
+  as_root: true
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    url: https://altcos.altlinux.org/
+    message: "Initial commit"
+
+- name: build-qcow2.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    storage: $storage
+    commit: latest
+  as_root: true
+
+- name: pkgdiff.py
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    commit: latest
+  as_root: true
+
+- name: buildsum.py
+  args:
+    branch: sisyphus
+    storage: $storage
+  as_root: true
+
+- name: pull-local.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    commit: latest
+  as_root: true

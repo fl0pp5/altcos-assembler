@@ -1,0 +1,152 @@
+variables:
+- name: flannel_url
+  value: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+- name: stream
+  value: altcos/x86_64/sisyphus/base
+- name: dest_stream
+  value: altcos/x86_64/sisyphus/k8s
+- name: repo_root
+  value: "echo -n `pwd`/ALTCOS/repo"
+  command: true
+- name: storage
+  value: "echo -n `pwd`/ALTCOS/storage"
+  command: true
+- name: forward_root
+  value: "echo -n `pwd`/examples/k8s/root"
+  command: true
+- name: mode
+  value: "bare"
+
+services:
+- name: checkout.sh
+  as_root: true
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    dest_stream: $dest_stream
+
+- name: forward-root.sh
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    forward_root: $forward_root
+  as_root: true
+
+- name: butane.sh
+  as_root: true
+  with_print: true
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    butane: >-
+      "variant: fcos
+
+      version: 1.3.0
+
+      storage:
+        directories:
+          - path: /usr/share/k8s/flannel
+        trees:
+          - local: root
+            path: /
+        files:
+          - path: /bin/loadDockerArchiveImages.sh
+            mode: 0755
+            overwrite: true
+          - path: /etc/systemd/system/kubelet.service.d/kubeadm.conf
+            overwrite: true
+          - path:  /usr/share/k8s/flannel/kube-flannel.yml
+            contents:
+              source: $flannel_url"
+
+- name: apt.sh
+  as_root: true
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    action: update
+    pkgs: ""
+
+- name: apt.sh
+  as_root: true
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    action: install
+    pkgs: "cri-o kubernetes-kubeadm kubernetes-kubelet kubernetes-crio cri-tools bash-completion yq jq tzdata net-tools"
+
+- name: butane.sh
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    butane: >-
+      "variant: fcos
+
+      version: 1.3.0
+      
+      systemd:
+        units:
+          - name: crio.service
+            enabled: true
+          - name: kubelet.service
+            enabled: true
+          - name: kube-proxy.service
+            enabled: true"
+  as_root: true
+
+- name: skopeo-copy.sh
+  with_print: true
+  variables:
+  - name: images
+    value: "kubeadm config images list --kubernetes-version latest"
+    command: true
+  - name: image_list
+    value: "$images quay.io/coreos/flannel:v0.15.1 docker.io/rancher/mirrored-flannelcni-flannel-cni-plugin:v1.0.0 quay.io/coreos/flannel:v0.15.1"
+
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    mode: $mode
+    images: $image_list
+  as_root: true
+
+- name: make-commit.sh
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    mode: $mode
+    commit: latest
+    next: minor
+    message: "k8s initial commit"
+  as_root: true
+
+- name: build-qcow2.sh
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    mode: $mode
+    storage: $storage
+    commit: latest
+  as_root: true
+
+- name: pkgdiff.py
+  args:
+    stream: $dest_stream
+    repo_root: $repo_root
+    commit: latest
+  as_root: true
+
+- name: buildsum.py
+  args:
+    branch: sisyphus
+    storage: $storage
+  as_root: true
+
+- name: pull-local.sh
+  args:
+    stream: $stream
+    repo_root: $repo_root
+    mode: $mode
+    commit: latest
+  as_root: true
