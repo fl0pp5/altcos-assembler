@@ -129,9 +129,10 @@ make \
     APTCONF="$apt_dir"/apt.conf."$BRANCH"."$ARCH" \
     BRANCH="$BRANCH" \
     IMAGEDIR="$build_dir" \
-    live-altcos-install.iso
+    DEBUG=1 \
+    live-install-altcos.iso
 
-mv "$(realpath "$build_dir"/live-altcos-install-latest-x86_64.iso)" "$image_file"
+mv "$(realpath "$build_dir"/live-install-altcos-latest-x86_64.iso)" "$image_file"
 
 find "$build_dir" -type l -delete
 
