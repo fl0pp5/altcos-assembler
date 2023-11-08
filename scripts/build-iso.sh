@@ -96,7 +96,7 @@ cd "$cur_dir"
 
 sudo tar -cf - \
     -C "$(dirname "$commit_dir")" var \
-    | xz -9 -c - > "$rpmbuild_dir"/SOURCES/var.tar.xz
+    | xz -9 -c -T0 --memlimit=2048MiB - > "$rpmbuild_dir"/SOURCES/var.tar.xz
 
 mkdir "$rpmbuild_dir"/altcos_root
 
@@ -111,7 +111,7 @@ sudo ostree \
     "$STREAM"
 
 sudo tar -cf - -C "$rpmbuild_dir"/altcos_root . \
-    | xz -9 -c -T0 - > "$rpmbuild_dir"/SOURCES/altcos_root.tar.xz
+    | xz -9 -c -T0 --memlimit=2048MiB - > "$rpmbuild_dir"/SOURCES/altcos_root.tar.xz
 sudo rm -rf "$rpmbuild_dir"/altcos_root
 
 rpmbuild \
@@ -129,7 +129,6 @@ make \
     APTCONF="$apt_dir"/apt.conf."$BRANCH"."$ARCH" \
     BRANCH="$BRANCH" \
     IMAGEDIR="$build_dir" \
-    DEBUG=1 \
     live-install-altcos.iso
 
 mv "$(realpath "$build_dir"/live-install-altcos-latest-x86_64.iso)" "$image_file"
