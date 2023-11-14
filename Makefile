@@ -5,6 +5,7 @@ install-deps:
 		hasher \
 		hasher-priv \
 		mkimage \
+		mkimage-preinstall \
 		fakeroot \
 		basesystem \
 		rpm-build \
@@ -25,7 +26,9 @@ install-deps:
 		libvirt \
 		libvirt-kvm \
 		libvirt-qemu \
-		parted
+		parted \
+		grub \
+		grub-efi
 
 get-mkimage:
 	mkdir -p ALTCOS; cd ALTCOS; \
