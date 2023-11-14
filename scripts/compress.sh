@@ -64,9 +64,5 @@ build_dir="$(get_artifact_dir \
 
 image_file="$build_dir"/"$BRANCH"_"$NAME"."$ARCH"."$version"."$platform"."$format"
 
-if [ ! -f "$image_file" ]; then
-    fatal "\"$image_file\" image file does not exsits"
-    exit 1
-fi
+xz -9 -T0 --memlimit=2048MiB "$image_file"
 
-sudo xz -v9 "$image_file"
