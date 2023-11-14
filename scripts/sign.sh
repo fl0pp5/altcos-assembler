@@ -71,10 +71,10 @@ build_dir="$(get_artifact_dir \
     "$storage")"
 
 image_file="$build_dir"/"$BRANCH"_"$NAME"."$ARCH"."$version"."$platform"."$format"
+compressed="$image_file".xz
 
-if [ ! -f "$image_file" ]; then
-    fatal "\"$image_file\" image file does not exsits"
-    exit 1
-fi
-
-openssl dgst -sha256 -sign "$key" -out "$image_file".sig "$image_file"
+for file in $image_file $compressed; do
+    if [ -f "$file" ]; then
+        openssl dgst -sha256 -sign "$key" -out "$file".sig "$file"
+    fi
+done
