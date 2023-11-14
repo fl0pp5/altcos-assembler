@@ -42,17 +42,14 @@ class Collector:
         [location, signature, uncompressed, uncompressed_signature] = [None] * 4
 
         for artifact in artifacts:
-            # <branch>/<name>/<version>/<platform>/<format>/<artifact>
-            relative_artifact_path = pathlib.Path(*artifact.parts[-7:])
-
-            if artifact.name.endswith(".tar.gz.sig"):
-                signature = relative_artifact_path
+            if artifact.name.endswith(".xz.sig"):
+                signature = artifact
             elif artifact.name.endswith(".xz"):
-                location = relative_artifact_path
+                location = artifact
             elif artifact.name.endswith(".sig"):
-                uncompressed_signature = relative_artifact_path
+                uncompressed_signature = artifact
             else:
-                uncompressed = relative_artifact_path
+                uncompressed = artifact
 
         return altcos.Artifact(
             location, signature, uncompressed, uncompressed_signature
