@@ -86,17 +86,6 @@ prepare_apt_dirs "$PWD"
 
 rsync -av var "$var_dir"
 
-if [ -d lib ]
-then
-    mkdir -p usr/share
-    rsync -avd lib/rpm usr/share
-    if [[ ! -e "$MERGED_DIR"/usr/share/rpm ]]
-    then
-        mkdir -p "$MERGED_DIR"/usr/share/rpm
-        cp -r usr/share/rpm/* "$MERGED_DIR"/usr/share/rpm
-    fi
-fi
-
 rm -rf run var
 mkdir var
 
@@ -106,7 +95,9 @@ rm -rf "$to_delete"
 
 cd ../upper
 
+set +eo pipefail 
 find . -depth | (cd ../merged;cpio -pmdu "$WORK_DIR"/root)
+set -eo pipefail
 
 cd ..
 umount merged
