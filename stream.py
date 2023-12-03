@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import abc
 import argparse
+import datetime
 import logging
 import sys
 
@@ -85,11 +86,17 @@ class VersionHandler(Handler):
             else:
                 version = commit.version
 
-        match args.next:
-            case "major":
-                version.major += 1
-            case "minor":
-                version.minor += 1
+        if args.next:
+            today = datetime.datetime.now().strftime("%Y%m%d")
+            if version.date != today:
+                version.date = today
+                version.major = version.minor = 0
+            else:
+                match args.next:
+                    case "major":
+                        version.major += 1
+                    case "minor":
+                        version.minor += 1
 
         print(VersionHandler.apply_view(version, args.view))
 
